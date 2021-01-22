@@ -1,0 +1,10 @@
+!#/bin/bash
+function mig_dirs() {
+    echo "Paste domains below: "
+    cat > ~/migration/files/.tmp_list.txt
+    cat ~/migration/files/.tmp_list.txt | while read x ; do 
+        mkdir ~/migration/files/"$x" 
+        done 
+    echo "Site Directories in mig dirs:"
+}
+mig_dirs
