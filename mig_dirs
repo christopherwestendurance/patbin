@@ -4,7 +4,8 @@ function mig_dirs() {
     cat > ~/migration/files/.tmp_list.txt
     cat ~/migration/files/.tmp_list.txt | while read x ; do 
         mkdir ~/migration/files/"$x" 
-        done 
+        done
+    rm -f ~/migration/files/.tmp_list.txt
     echo "Site Directories in mig dirs:"
 }
 mig_dirs
