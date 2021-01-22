@@ -1,0 +1,41 @@
+#!/bin/bash
+function findwps() {
+  myDiv='------------------------'
+  GREEN='\033[0;32m'
+  NC='\033[0m' #No Color
+  cd ~
+  find -name wp-config.php 2> /dev/null | while read x ; do
+  relSITE_DIR=$(dirname "$x")
+  SITE_DIR=`echo $(cd $relSITE_DIR ; (pwd))`
+  DB_USER=$(cat "$x" | grep -H DB_USER 2>/dev/null | cut -d "'" -f 4)
+  DB_PASS=$(cat "$x" | grep -H DB_PASSWORD 2>/dev/null | cut -d "'" -f 4)
+  DB_NAME=$(cat "$x" | grep -H DB_NAME 2>/dev/null | cut -d "'" -f 4)    
+  DB_HOST=$(cat "$x" | grep -H DB_HOST 2>/dev/null | cut -d "'" -f 4)
+  #CLEAN_PASS=$(echo \'"$DB_PASS"\')    
+  if [[ -n "$(cat "$x" | grep -H DB_PASSWORD 2>/dev/null | cut -d "'" -f 4 )" ]] ; then
+    table_prefix=$(cat "$x" | grep -H table_prefix | cut -d "'" -f 2)    
+    prefix="${table_prefix}options"
+    SITE_URL=$(mysql -h $DB_HOST -u $DB_USER -N -p"$DB_PASS" -h $DB_HOST $DB_NAME <<<"SELECT * FROM $prefix WHERE option_name = 'siteurl'" 2> /dev/null)
+    HOME_URL=$(mysql -h $DB_HOST -u $DB_USER -N -p"$DB_PASS" -h $DB_HOST $DB_NAME <<<"SELECT * FROM $prefix WHERE option_name = 'home'" 2> /dev/null)
+    SITE=$(sed -E 's/(.*https:\/\/)|(.*http:\/\/)//g' <<< $SITE_URL | awk '{print $1}')
+    HOME=$(sed -E 's/(.*https:\/\/)|(.*http:\/\/)//g' <<< $HOME_URL | awk '{print $1}')
+    if [[ -n "$SITE_URL" ]] ; then
+      echo -e $myDiv
+      echo -e SITE URL = "${GREEN}$SITE" ${NC}
+      echo -e HOME URL = "${GREEN}$HOME" ${NC}
+      echo -e "DB = $DB_NAME"
+      echo "DIR = $SITE_DIR/"
+#     echo "Dir Size: $(du -sh $SITE_DIR | awk '{print $1}')"
+#      echo "Last Error: $(tail -30 $SITE_DIR/error_log 2>/dev/null | grep "\[*\]" > $SITE_DIR/recent_error.txt ;  tail -n 1 $SITE_DIR/recent_error.txt 2>/dev/null)"
+    else
+      echo -e $myDiv
+      echo "Couldn\'t connect to wp installation using db $DB_NAME in $SITE_DIR"
+    fi
+  else
+    echo -e $myDiv
+    echo "Skipping site in $SITE_DIR"
+  fi
+  done
+  echo -e $myDiv
+}
+findwps
