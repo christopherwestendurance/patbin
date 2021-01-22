@@ -1,0 +1,11 @@
+function dumpdb() {
+  DB_USER=$( grep DB_USER wp-config.php | cut -d "'" -f 4)    
+  DB_PASS=$( grep DB_PASSWORD wp-config.php | cut -d "'" -f 4)
+  DB_NAME=$( grep DB_NAME wp-config.php | cut -d "'" -f 4)
+  mysqldump -u"$DB_USER" -p"$DB_PASS" "$DB_NAME" > "$DB_NAME"_mig.sql
+  if test -f "$DB_NAME"_mig.sql ; then
+    echo "Successfully dumped DB $DB_NAME"
+  else
+    echo "Did not dump DB $DB_NAME"
+  fi
+}
